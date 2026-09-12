@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tabbyapi.fullname" . }}
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: {{ include "tabbyapi.name" . }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ include "tabbyapi.name" . }}
+
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/model: {{ include "tabbyapi.modelHash" . }}
+
+    spec:
+      initContainers:
+        - name: model-download
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          env:
+            - name: MODEL_NAME
+              value: {{ .Values.model.name | quote }}
+
+            - name: MODEL_REPO
+              value: {{ .Values.model.repo | quote }}
+
+            - name: MODEL_REVISION
+              value: {{ .Values.model.revision | quote }}
+
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              MODEL_DIR="/app/models/${MODEL_NAME}"
+              MARKER="/app/models/.managed-model"
+
+              EXPECTED_MARKER="${MODEL_NAME}
+              ${MODEL_REPO}
+              ${MODEL_REVISION}"
+
+              echo "Expected model:"
+              echo "${EXPECTED_MARKER}"
+
+              if [ -f "${MARKER}" ] && \
+                 [ "$(cat "${MARKER}")" = "${EXPECTED_MARKER}" ] && \
+                 [ -d "${MODEL_DIR}" ]; then
+                echo "Model already downloaded."
+                exit 0
+              fi
+
+              echo "Model has changed or is missing."
+              echo "Removing existing models..."
+
+              find /app/models -mindepth 1 -maxdepth 1 \
+                ! -name '.lost+found' \
+                -exec rm -rf {} +
+
+              echo "Downloading ${MODEL_REPO}@${MODEL_REVISION}..."
+
+              python main.py download \
+                "${MODEL_REPO}" \
+                --revision "${MODEL_REVISION}"
+
+              echo "Download complete."
+
+              printf '%s\n' "${EXPECTED_MARKER}" > "${MARKER}"
+
+              echo "Model marker written."
+
+          volumeMounts:
+            - name: models
+              mountPath: /app/models
+
+      containers:
+        - name: tabbyapi
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: 5000
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yml
+              subPath: config.yml
+
+            - name: models
+              mountPath: /app/models
+
+            - name: shm
+              mountPath: /dev/shm
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "tabbyapi.fullname" . }}-config
+
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ include "tabbyapi.fullname" . }}-models
+
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.shmSize }}

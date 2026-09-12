@@ -1,0 +1,29 @@
+image:
+  repository: ghcr.io/theroyallab/tabbyapi
+  tag: latest
+
+tabbyapi:
+  enabled: true
+vllm:
+  enabled: false
+
+model:
+  name: Qwen3.8-27B
+  repo: turboderp/Qwen3.8-27B-exl3
+  revision: SC_4.00bpw_H5_V6
+  config:
+    maxSeqLen: 262144
+    cacheSize: 262144
+    cache_mode: 8,8
+    reasoning: true
+    gpuSplitAuto: true
+    tool_format: qwen3_coder
+
+ingresses:
+  - name: tabby-api
+    host: tabby-api.home.arpa
+    paths:
+      - path: /
+        service:
+          name: tabbyapi
+          port: 5000

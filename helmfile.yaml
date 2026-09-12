@@ -11,12 +11,16 @@ environments:
     values:
       - values/vllm-amd.yaml
 
+  tabbyapi:
+    values:
+      - values/tabbyapi.yaml
+
 ---
 
 values:
   - vllm:
-      enabled: false
-  - tabby-api:
+      enabled: true
+  - tabbyapi:
       enabled: false
 
 repositories:
@@ -27,13 +31,31 @@ releases:
   - name: vllm
     namespace: llm
     createNamespace: true
+    condition: vllm.enabled
     chart: vllm/vllm-stack
     version: 0.1.12
     values:
       - values/vllm.yaml.gotmpl
 
-  - name: service-access
+  - name: vllm-service-access
     namespace: llm
+    condition: vllm.enabled
     chart: ./charts/service-access
     values:
       - values/vllm-{{ .Environment.Name }}.yaml
+
+
+  - name: tabbyapi
+    namespace: llm
+    createNamespace: true
+    chart: ./charts/tabbyapi
+    condition: tabbyapi.enabled
+    values:
+      - values/tabbyapi.yaml
+
+  - name: tabbyapi-service-access
+    namespace: llm
+    condition: tabbyapi.enabled
+    chart: ./charts/service-access
+    values:
+      - values/tabbyapi.yaml
