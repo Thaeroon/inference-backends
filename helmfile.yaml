@@ -1,0 +1,39 @@
+environments:
+  apple:
+    values:
+      - values/vllm-apple.yaml
+
+  nvidia:
+    values:
+      - values/vllm-nvidia.yaml
+
+  amd:
+    values:
+      - values/vllm-amd.yaml
+
+---
+
+values:
+  - vllm:
+      enabled: false
+  - tabby-api:
+      enabled: false
+
+repositories:
+  - name: vllm
+    url: https://vllm-project.github.io/production-stack
+
+releases:
+  - name: vllm
+    namespace: llm
+    createNamespace: true
+    chart: vllm/vllm-stack
+    version: 0.1.12
+    values:
+      - values/vllm.yaml.gotmpl
+
+  - name: service-access
+    namespace: llm
+    chart: ./charts/service-access
+    values:
+      - values/vllm-{{ .Environment.Name }}.yaml

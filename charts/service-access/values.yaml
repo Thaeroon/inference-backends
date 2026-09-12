@@ -1,0 +1,6 @@
+nameOverride: ""
+fullnameOverride: ""
+
+ingressClassName: traefik
+
+ingresses: []

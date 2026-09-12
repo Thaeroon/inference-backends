@@ -1,0 +1,24 @@
+platform:
+  vllm:
+    repository: vllm/vllm-openai-cpu
+    tag: latest-arm64
+
+  gpu:
+    enabled: false
+    type: ""
+
+  runtimeClassName: ""
+
+  router:
+    enabled: false
+
+ingressClassName: traefik
+
+ingresses:
+  - name: vllm
+    host: vllm.home.arpa
+    paths:
+      - path: /
+        service:
+          name: vllm-qwen3-engine-service
+          port: 80

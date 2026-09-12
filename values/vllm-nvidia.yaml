@@ -1,0 +1,24 @@
+platform:
+  vllm:
+    repository: vllm/vllm-openai
+    tag: v0.29.0
+
+  gpu:
+    enabled: true
+    type: nvidia.com/gpu
+
+  runtimeClassName: nvidia
+
+  router:
+    enabled: true
+
+ingressClassName: traefik
+
+ingresses:
+  - name: vllm
+    host: vllm.home.arpa
+    paths:
+      - path: /
+        service:
+          name: vllm-router-service
+          port: 80

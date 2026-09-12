@@ -1,0 +1,36 @@
+servingEngineSpec:
+  enableEngine: true
+
+  runtimeClassName: {{ .Values.platform.runtimeClassName | quote }}
+
+  modelSpec:
+    - name: qwen3
+      enabled: true
+
+      runtimeClassName: ""
+
+      repository: {{ .Values.platform.vllm.repository | quote }}
+      tag: {{ .Values.platform.vllm.tag | quote }}
+
+      modelURL: Qwen/Qwen3-0.6B
+
+      replicaCount: 1
+
+      requestCPU: 2
+      requestMemory: 4Gi
+      requestGPU: 0
+      requestGPUType: ""
+
+      pvcStorage: 4Gi
+
+      shmSize: "512Mi"
+
+      vllmConfig:
+        maxModelLen: 2048
+        dtype: "auto"
+        tensorParallelSize: 1
+        maxNumSeqs: 2
+        gpuMemoryUtilization: 0.4
+
+routerSpec:
+  enableRouter: {{ .Values.platform.router.enabled }}

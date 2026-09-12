@@ -1,0 +1,37 @@
+{{- range .Values.ingresses }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "service-access.ingressName" (dict "root" $ "name" .name) }}
+  namespace: {{ $.Release.Namespace }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .ingressClassName | default $.Values.ingressClassName | quote }}
+
+  {{- with .tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  rules:
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path | default "/" | quote }}
+            pathType: {{ .pathType | default "Prefix" | quote }}
+            backend:
+              service:
+                name: {{ .service.name | quote }}
+                port:
+                  {{- if .service.portName }}
+                  name: {{ .service.portName | quote }}
+                  {{- else }}
+                  number: {{ .service.port }}
+                  {{- end }}
+          {{- end }}
+{{- end }}
