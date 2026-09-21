@@ -1,0 +1,54 @@
+image:
+  repository: ghcr.io/ggml-org/llama.cpp
+  tag: server
+  pullPolicy: IfNotPresent
+
+llamacpp:
+  host: 0.0.0.0
+  port: 8080
+
+  model:
+    path: /models/model.gguf
+
+  # llama.cpp backend-specific GPU offload.
+  # 0 = CPU only, -1 = all layers.
+  gpuLayers: -1
+
+  # Server configuration.
+  contextSize: 4096
+  parallel: 1
+
+gpu:
+  enabled: false
+  resource: ""
+  count: 1
+
+resources:
+  requests:
+    cpu: 2
+    memory: 4Gi
+  limits:
+    memory: 8Gi
+
+service:
+  type: ClusterIP
+  port: 8080
+
+persistence:
+  enabled: true
+  size: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClass: ""
+
+ingress:
+  enabled: false
+  className: traefik
+  host: llamacpp.home.arpa
+  path: /
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

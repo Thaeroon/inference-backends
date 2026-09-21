@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llamacpp.fullname" . }}
+  labels:
+    {{- include "llamacpp.labels" . | nindent 4 }}
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      {{- include "llamacpp.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "llamacpp.selectorLabels" . | nindent 8 }}
+
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      containers:
+        - name: llamacpp
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          args:
+            - "--host"
+            - "{{ .Values.llamacpp.host }}"
+            - "--port"
+            - "{{ .Values.llamacpp.port }}"
+            - "--model"
+            - "{{ .Values.llamacpp.model.path }}"
+            - "--ctx-size"
+            - "{{ .Values.llamacpp.contextSize }}"
+            - "--parallel"
+            - "{{ .Values.llamacpp.parallel }}"
+            - "--n-gpu-layers"
+            - "{{ .Values.llamacpp.gpuLayers }}"
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.llamacpp.port }}
+              protocol: TCP
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: models
+              mountPath: /models
+
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ include "llamacpp.fullname" . }}-models

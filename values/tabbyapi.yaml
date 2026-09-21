@@ -2,11 +2,6 @@ image:
   repository: ghcr.io/theroyallab/tabbyapi
   tag: latest
 
-tabbyapi:
-  enabled: true
-vllm:
-  enabled: false
-
 model:
   name: Qwen3.8-27B
   repo: turboderp/Qwen3.8-27B-exl3

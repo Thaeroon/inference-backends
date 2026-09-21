@@ -1,0 +1,11 @@
+image:
+  tag: server-rocm
+
+  gpuLayers: -1
+
+resources:
+  limits:
+    amd.com/gpu: 1
+
+persistence:
+  size: 10Gi

@@ -1,26 +1,34 @@
 environments:
-  apple:
+  vllm-apple:
     values:
       - values/vllm-apple.yaml
+      - environments/vllm.yaml
+  
+  llamacpp-apple:
+    values:
+      - environments/llamacpp.yaml
 
-  nvidia:
+  vllm-nvidia:
     values:
       - values/vllm-nvidia.yaml
+      - environments/vllm.yaml
 
   amd:
     values:
-      - values/vllm-amd.yaml
+      - environments/llamacpp.yaml
 
   tabbyapi:
     values:
-      - values/tabbyapi.yaml
+      - environments/tabbyapi.yaml
 
 ---
 
 values:
   - vllm:
-      enabled: true
+      enabled: false
   - tabbyapi:
+      enabled: false
+  - llamacpp:
       enabled: false
 
 repositories:
@@ -42,7 +50,7 @@ releases:
     condition: vllm.enabled
     chart: ./charts/service-access
     values:
-      - values/vllm-{{ .Environment.Name }}.yaml
+      - values/{{ .Environment.Name }}.yaml
 
 
   - name: tabbyapi
@@ -59,3 +67,19 @@ releases:
     chart: ./charts/service-access
     values:
       - values/tabbyapi.yaml
+
+  - name: llamacpp
+    namespace: llm
+    createNamespace: true
+    condition: llamacpp.enabled
+    chart: ./charts/llamacpp
+    values:
+      - values/llamacpp.yaml
+      - values/{{ .Environment.Name }}.yaml
+
+  - name: llamacpp-service-access
+    namespace: llm
+    condition: llamacpp.enabled
+    chart: ./charts/service-access
+    values:
+      - values/llamacpp.yaml

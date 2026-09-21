@@ -1,0 +1,27 @@
+image:
+  repository: ghcr.io/ggml-org/llama.cpp
+  tag: server
+
+llamacpp:
+  model:
+    path: /models/model.gguf
+
+  gpuLayers: 0
+
+resources:
+  requests:
+    cpu: 2
+    memory: 2Gi
+  limits:
+    cpu: 4
+    memory: 4Gi
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+ingress:
+  enabled: true
+  className: traefik
+  host: llamacpp.home.arpa
+  path: /
