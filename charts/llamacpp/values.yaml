@@ -8,13 +8,25 @@ llamacpp:
   port: 8080
 
   model:
-    path: /models/model.gguf
+    # Hugging Face repository containing the GGUF model.
+    # Example:
+    # repo: "Qwen/Qwen3-8B-GGUF"
+    repo: ""
+
+    # Optional exact GGUF filename.
+    # If omitted, llama.cpp will select the appropriate file.
+    file: ""
+
+    # Optional Hugging Face revision/branch/commit.
+    revision: ""
+
+    # Local directory used by llama.cpp/Hugging Face for the model.
+    cacheDir: /models
 
   # llama.cpp backend-specific GPU offload.
   # 0 = CPU only, -1 = all layers.
   gpuLayers: -1
 
-  # Server configuration.
   contextSize: 4096
   parallel: 1
 
@@ -40,12 +52,6 @@ persistence:
   accessModes:
     - ReadWriteOnce
   storageClass: ""
-
-ingress:
-  enabled: false
-  className: traefik
-  host: llamacpp.home.arpa
-  path: /
 
 nodeSelector: {}
 

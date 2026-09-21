@@ -4,7 +4,8 @@ image:
 
 llamacpp:
   model:
-    path: /models/model.gguf
+    repo: "Qwen/Qwen3-0.6B-GGUF"
+    file: "Qwen3-0.6B-Q8_0.gguf"
 
   gpuLayers: 0
 
@@ -20,8 +21,11 @@ persistence:
   enabled: true
   size: 10Gi
 
-ingress:
-  enabled: true
-  className: traefik
-  host: llamacpp.home.arpa
-  path: /
+ingresses:
+  - name: llamacpp
+    host: llamacpp.home.arpa
+    paths:
+      - path: /
+        service:
+          name: llamacpp
+          port: 8080

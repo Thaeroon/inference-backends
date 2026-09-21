@@ -39,17 +39,36 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
+          env:
+            - name: HF_HOME
+              value: {{ .Values.llamacpp.model.cacheDir | quote }}
+
           args:
             - "--host"
             - "{{ .Values.llamacpp.host }}"
+
             - "--port"
             - "{{ .Values.llamacpp.port }}"
-            - "--model"
-            - "{{ .Values.llamacpp.model.path }}"
+
+            - "--hf-repo"
+            - "{{ .Values.llamacpp.model.repo }}"
+
+            {{- if .Values.llamacpp.model.file }}
+            - "--hf-file"
+            - "{{ .Values.llamacpp.model.file }}"
+            {{- end }}
+
+            {{- if .Values.llamacpp.model.revision }}
+            - "--hf-revision"
+            - "{{ .Values.llamacpp.model.revision }}"
+            {{- end }}
+
             - "--ctx-size"
             - "{{ .Values.llamacpp.contextSize }}"
+
             - "--parallel"
             - "{{ .Values.llamacpp.parallel }}"
+
             - "--n-gpu-layers"
             - "{{ .Values.llamacpp.gpuLayers }}"
 
@@ -65,7 +84,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 60
 
           livenessProbe:
             httpGet:
@@ -81,7 +100,7 @@ spec:
 
           volumeMounts:
             - name: models
-              mountPath: /models
+              mountPath: {{ .Values.llamacpp.model.cacheDir }}
 
       volumes:
         - name: models
