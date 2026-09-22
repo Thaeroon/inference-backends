@@ -3,15 +3,15 @@ image:
   tag: server
 
 llamacpp:
-  model: "openbmb/MiniCPM5-1B-GGUF:Q8_0"
+  model: "openbmb/MiniCPM5-2B-GGUF:Q8_0"
 
 resources:
   requests:
     cpu: 2
     memory: 4Gi
   limits:
-    cpu: 4
-    memory: 8Gi
+    cpu: 8
+    memory: 9Gi
 
 persistence:
   enabled: true
