@@ -41,7 +41,7 @@ spec:
 
           env:
             - name: HF_HOME
-              value: {{ .Values.llamacpp.model.cacheDir | quote }}
+              value: {{ .Values.llamacpp.cacheDir | quote }}
 
           args:
             - "--host"
@@ -50,21 +50,13 @@ spec:
             - "--port"
             - "{{ .Values.llamacpp.port }}"
 
-            - "--hf-repo"
-            - "{{ .Values.llamacpp.model.repo }}"
+            - "-hf"
+            - "{{ .Values.llamacpp.model }}"
 
-            {{- if .Values.llamacpp.model.file }}
-            - "--hf-file"
-            - "{{ .Values.llamacpp.model.file }}"
-            {{- end }}
-
-            {{- if .Values.llamacpp.model.revision }}
-            - "--hf-revision"
-            - "{{ .Values.llamacpp.model.revision }}"
-            {{- end }}
-
+            {{- if .Values.llamacpp.contextSize }}
             - "--ctx-size"
             - "{{ .Values.llamacpp.contextSize }}"
+            {{- end }}
 
             - "--parallel"
             - "{{ .Values.llamacpp.parallel }}"
@@ -100,7 +92,7 @@ spec:
 
           volumeMounts:
             - name: models
-              mountPath: {{ .Values.llamacpp.model.cacheDir }}
+              mountPath: {{ .Values.llamacpp.cacheDir }}
 
       volumes:
         - name: models

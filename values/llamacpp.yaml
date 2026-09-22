@@ -3,19 +3,15 @@ image:
   tag: server
 
 llamacpp:
-  model:
-    repo: "Qwen/Qwen3-0.6B-GGUF"
-    file: "Qwen3-0.6B-Q8_0.gguf"
-
-  gpuLayers: 0
+  model: "openbmb/MiniCPM5-1B-GGUF:Q8_0"
 
 resources:
   requests:
     cpu: 2
-    memory: 2Gi
+    memory: 4Gi
   limits:
     cpu: 4
-    memory: 4Gi
+    memory: 8Gi
 
 persistence:
   enabled: true
